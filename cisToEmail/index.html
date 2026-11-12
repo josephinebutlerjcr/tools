@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CIS to Email</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <style>
+        textarea { box-sizing: border-box; width: 100%; min-height: 180px; margin: 0.5rem 0 1rem; padding: 0.8rem; border: 1px solid #bbb; border-radius: 8px; font: inherit; resize: vertical; }
+        button { padding: 0.7rem 1rem; border: 0; border-radius: 8px; background: #410303; color: white; font: inherit; cursor: pointer; }
+        button:hover { background: #840606; }
+        .output-row { display: flex; align-items: flex-start; gap: 0.75rem; }
+        .output-row textarea { flex: 1; }
+        .copy-button { margin-top: 0.5rem; white-space: nowrap; }
+        @media (max-width: 600px) { .output-row { display: block; } }
+    </style>
+</head>
+<body>
+    <h1>CIS to Email</h1>
+    <p><a href="/">Back Home</a></p>
+    <p>Paste CIS codes from Excel, Google Sheets, or a list. Any non-CIS codes (e.g. already formatted emails) shall be skipped but given in your output. No data will be sent to a server - it all is processed on your computer.</p>
+
+    <label for="input">CIS codes or email addresses</label>
+    <textarea id="input" placeholder="abcd12,dma0aaa,example@durham.ac.uk"></textarea>
+    <button id="convert" type="button"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i> Convert</button>
+
+    <p><label for="output">Output</label></p>
+    <div class="output-row">
+        <textarea id="output" readonly aria-label="Converted email addresses"></textarea>
+        <button class="copy-button" id="copy" type="button"><i class="fa-regular fa-copy" aria-hidden="true"></i> Copy</button>
+    </div>
+
+    <script>
+        const input = document.getElementById('input');
+        const output = document.getElementById('output');
+        const convertButton = document.getElementById('convert');
+        const copyButton = document.getElementById('copy');
+
+        function convert() {
+            const values = input.value.split(/[\s,]+/).map(value => value.trim()).filter(Boolean);
+            output.value = values.map(value => {
+                const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+                const isCis = /^(?:[a-z]{4}\d{2}|[a-z]{3}\d[a-z]{3})$/i.test(value);
+                return isEmail || !isCis ? value : `${value}@durham.ac.uk`;
+            }).join(', ');
+        }
+
+        convertButton.addEventListener('click', convert);
+        copyButton.addEventListener('click', async () => {
+            await navigator.clipboard.writeText(output.value);
+            copyButton.innerHTML = '<i class="fa-solid fa-check" aria-hidden="true"></i> Copied';
+            setTimeout(() => copyButton.innerHTML = '<i class="fa-regular fa-copy" aria-hidden="true"></i> Copy', 1500);
+        });
+    </script>
+</body>
+</html>
